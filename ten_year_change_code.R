@@ -55,7 +55,7 @@ md1 %>% mutate(efit=exp(fitted(lm(log_idx~year, data=md1))),
   scale_x_continuous(breaks=seq(1995, 2020, 5)) +
   geom_line(aes(y=efit), col="#e41a1c", lty=5) + 
   geom_line(aes(y=lfit), col="#e41a1c", lty=1)
-# ggsave("figure_1.tiff", width = 8.66, height = 4.33, dpi = 600, units = "in")
+ggsave("figure_1.tiff", width = 8.66, height = 4.33, dpi = 600, units = "in")
 
 # some other data properties
 n_years <- nrow(md1)
