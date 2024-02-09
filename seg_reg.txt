@@ -1,0 +1,21 @@
+
+model {
+### priors
+  alpha ~ dnorm(0, 0.001)
+  for(j in 1:2){
+    beta[j] ~ dunif(-1, 1)
+    }
+  sigma ~ dunif(0, 10)
+  theta ~ dunif(15, 25)
+### likelihood
+  for (i in 1:n) {
+    y[i] ~ dnorm(mu[i], tau) 
+    mu[i] <- alpha + beta[1]*x[i] + beta[2]*(x[i] - theta) * step(x[i] - theta)
+  }
+### derived
+  tau <- 1/ (sigma * sigma)
+  tyc <- ((exp(mu[30]) - exp(mu[20])) / exp(mu[20])) * 100
+  for(i in 4:n){
+    loglik[i] <- logdensity.norm(y[i], mu[i], tau)
+  }
+}

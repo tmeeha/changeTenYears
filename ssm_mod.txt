@@ -1,0 +1,22 @@
+
+model {
+### priors
+  mu[1] ~ dnorm(y[1], ((0.67-0.21)/1.97)^-2)
+  b0 ~ dnorm(0, 0.001)
+  b1 <- 0 # dnorm(0, 0.001)
+  tau.obs <- 1 / (sigma.obs * sigma.obs)
+  sigma.obs ~ dnorm(0.44, ((0.67-0.21)/1.97)^-2)
+  tau.proc <- 1 / (sigma.proc * sigma.proc)
+  sigma.proc ~ dunif(0, 100)
+### likelihood
+  for (i in 2:n){
+    y[i] ~ dnorm(mu[i], tau.obs)
+    mu[i] <- mu[i - 1] + rate[i]
+    rate[i] ~ dnorm(b0 + b1 * (mu[i - 1]), tau.proc)
+  }
+### derived
+  tyc <- ((exp(mu[30]) - exp(mu[20])) / exp(mu[20])) * 100
+  for(i in 4:n){
+    loglik[i] <- logdensity.norm(y[i], mu[i], tau.obs)
+  }
+}
