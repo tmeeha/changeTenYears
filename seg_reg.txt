@@ -14,7 +14,7 @@ model {
   }
 ### derived
   tau <- 1/ (sigma * sigma)
-  tyc <- ((exp(mu[30]) - exp(mu[20])) / exp(mu[20])) * 100
+  tyc <- ((exp(mu[32]) - exp(mu[22])) / exp(mu[22])) * 100
   for(i in 4:n){
     loglik[i] <- logdensity.norm(y[i], mu[i], tau)
   }

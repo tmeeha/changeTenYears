@@ -16,19 +16,19 @@ theme_set(theme_bw())
 # get data ---------------------------------------------------------------------
 md0 <- data.frame(
   pop="Eastern migrants",
-  year = 1993:2023,
+  year = 1993:2024,
   index = c(6.23, 7.81,12.61,18.19,5.77,5.56,8.97,2.83,9.36,7.54,11.12,
             2.19,5.91,6.87,4.61,5.06,1.92,4.02,2.89,1.19,0.67,1.13,4.01,
-            2.91,2.48,6.05, 2.83, 2.10, 2.84, 2.21, 0.90)
+            2.91,2.48,6.05, 2.83, 2.10, 2.84, 2.21, 0.90, 1.79)
 ) %>% 
   mutate(index=round(index * 21100000,0)) %>% 
   bind_rows(data.frame(
     pop="Western migrants",
-    year = 1997:2023,
+    year = 1997:2024,
     index = c(1235490,564349,267574,390057,209570,99353,254378,205085,	
               218679,221058,86437,131889,58468,143204,222525,144812,	
               211275,234731,292888,298464,192624,27721,29436,1899,	
-              247246, 335479, 233394)))
+              247246, 335479, 233394, 9119)))
 
 # sum across regional populations
 md1 <- md0 %>%  
@@ -77,7 +77,7 @@ model {
   }
 ### derived
   tau <- 1/ (sigma * sigma)
-  tyc <- ((exp(mu[30]) - exp(mu[20])) / exp(mu[20])) * 100
+  tyc <- ((exp(mu[32]) - exp(mu[22])) / exp(mu[22])) * 100
   for(i in 4:n){
     loglik[i] <- logdensity.norm(y[i], mu[i], tau)
   }
@@ -90,8 +90,8 @@ dat_exp <- list(x = md1$yr, y = md1$log_idx, n = n_years)
 # parameters to monitor
 params <- c("alpha","beta", "sigma", "tyc", "loglik", "mu")
 
-# mcmc settings (add another 0 to ni, nt, nb for better posteriors)
-ni <- 1500000; nt <- 100; nb <- 500000; nc <- 2; nad <- 10000
+# mcmc settings (add two more zeros to ni, nt, nb for better posteriors)
+ni <- 150000; nt <- 10; nb <- 50000; nc <- 2; nad <- 1000
 
 # call jags and summarise posteriors
 exp_out <- jags(dat_exp, inits=NULL, params, "exp_reg.txt", 
@@ -127,7 +127,7 @@ model {
   }
 ### derived
   tau <- 1/ (sigma * sigma)
-  tyc <- ((exp(mu[30]) - exp(mu[20])) / exp(mu[20])) * 100
+  tyc <- ((exp(mu[32]) - exp(mu[22])) / exp(mu[22])) * 100
   for(i in 4:n){
     loglik[i] <- logdensity.norm(y[i], mu[i], tau)
   }
@@ -173,7 +173,7 @@ model {
     rate[i] ~ dnorm(b0 + b1 * (mu[i - 1]), tau.proc)
   }
 ### derived
-  tyc <- ((exp(mu[30]) - exp(mu[20])) / exp(mu[20])) * 100
+  tyc <- ((exp(mu[32]) - exp(mu[22])) / exp(mu[22])) * 100
   for(i in 4:n){
     loglik[i] <- logdensity.norm(y[i], mu[i], tau.obs)
   }
@@ -232,7 +232,7 @@ model {
     mu[i] <- inprod(B[i, ], beta)
   }
 ### derived
-  tyc <- ((exp(mu[30]) - exp(mu[20])) / exp(mu[20])) * 100
+  tyc <- ((exp(mu[32]) - exp(mu[22])) / exp(mu[22])) * 100
   for(i in 4:n){
     loglik[i] <- logdensity.norm(y[i], mu[i], sigma^-2)
   }
@@ -323,8 +323,8 @@ ts_exp <- ggplot(md2, aes(x=year))  +
   geom_line(aes(y=exp50), linewidth=0.8, col="#e41a1c") + geom_point(aes(y=log_idx), pch=1) +
   labs(x="Year", y="EXP log(monarch abundance)") +
   scale_y_continuous(limits=c(16, 20)) +
-  scale_x_continuous(breaks=seq(1995, 2020, 5)) +
-  geom_vline(xintercept=2013, lty=2, col="gray20")
+  scale_x_continuous(breaks=seq(1994, 2024, 5)) +
+  geom_vline(xintercept=2014, lty=2, col="gray20")
 
 ts_seg <- ggplot(md2, aes(x=year))  + 
   geom_ribbon(aes(ymin=seg2.5, ymax=seg97.5), alpha=0.2, fill="#377eb8") +
@@ -333,8 +333,8 @@ ts_seg <- ggplot(md2, aes(x=year))  +
   geom_line(aes(y=seg50), linewidth=0.8, col="#377eb8") + geom_point(aes(y=log_idx), pch=1) +
   labs(x="Year", y="SEG log(monarch abundance)") +
   scale_y_continuous(limits=c(16, 20)) +
-  scale_x_continuous(breaks=seq(1995, 2020, 5)) +
-  geom_vline(xintercept=2013, lty=2, col="gray20")
+  scale_x_continuous(breaks=seq(1994, 2024, 5)) +
+  geom_vline(xintercept=2014, lty=2, col="gray20")
 
 ts_ssm <- ggplot(md2, aes(x=year))  + 
   geom_ribbon(aes(ymin=ssm2.5, ymax=ssm97.5), alpha=0.2, fill="#984ea3") +
@@ -343,8 +343,8 @@ ts_ssm <- ggplot(md2, aes(x=year))  +
   geom_line(aes(y=ssm50), linewidth=0.8, col="#984ea3") + geom_point(aes(y=log_idx), pch=1) +
   labs(x="Year", y="SSM log(monarch abundance)") +
   scale_y_continuous(limits=c(16, 20)) +
-  scale_x_continuous(breaks=seq(1995, 2020, 5)) +
-  geom_vline(xintercept=2013, lty=2, col="gray20")
+  scale_x_continuous(breaks=seq(1994, 2024, 5)) +
+  geom_vline(xintercept=2014, lty=2, col="gray20")
 
 ts_gam <- ggplot(md2, aes(x=year))  + 
   geom_ribbon(aes(ymin=gam2.5, ymax=gam97.5), alpha=0.2, fill="#4daf4a") +
@@ -353,8 +353,8 @@ ts_gam <- ggplot(md2, aes(x=year))  +
   geom_line(aes(y=gam50), linewidth=0.8, col="#4daf4a") + geom_point(aes(y=log_idx), pch=1) +
   labs(x="Year", y="GAM log(monarch abundance)") +
   scale_y_continuous(limits=c(16, 20)) +
-  scale_x_continuous(breaks=seq(1995, 2020, 5)) +
-  geom_vline(xintercept=2013, lty=2, col="gray20")
+  scale_x_continuous(breaks=seq(1994, 2024, 5)) +
+  geom_vline(xintercept=2014, lty=2, col="gray20")
 
 # all time series
 plot_grid(ts_exp, ts_seg, ts_gam, ts_ssm, ncol=2)
@@ -366,7 +366,7 @@ tyc_samps <- data.frame(exp=exp_out$BUGSoutput$sims.list$tyc,
                         ssm=ssm_out$BUGSoutput$sims.list$tyc,
                         gam=gam_out$BUGSoutput$sims.list$tyc)
 
-# summarise tyc
+# summarize tyc
 exp_30 <- sum(tyc_samps$exp < -30) / 20000
 seg_30 <- sum(tyc_samps$seg < -30) / 20000
 ssm_30 <- sum(tyc_samps$ssm < -30) / 20000
@@ -487,7 +487,7 @@ model {
     rate[i] ~ dnorm(b0 + b1 * (mu[i - 1]), tau.proc)
   }
 ### derived
-  tyc <- ((exp(mu[30]) - exp(mu[20])) / exp(mu[20])) * 100
+  tyc <- ((exp(mu[32]) - exp(mu[22])) / exp(mu[22])) * 100
   for(i in 4:n){
     loglik[i] <- logdensity.norm(y[i], mu[i], tau.obs)
   }
@@ -514,10 +514,10 @@ MCMCtrace(ssm_out2, "mu[10]", ISB=F, pdf=F)
 MCMCtrace(ssm_out2, "mu[15]", ISB=F,pdf=F)
 MCMCtrace(ssm_out2, "mu[30]", ISB=F,pdf=F)
 
-# get draws for mu[51]
-samps_20 <- as.numeric(MCMCchains(ssm_out2, "mu[51]", ISB = F))
+# get draws for mu[52]
+samps_20 <- as.numeric(MCMCchains(ssm_out2, "mu[52]", ISB = F))
 
-# summarise mu51
+# summarise mu52
 summary(samps_20)
 p_200k <- sum(samps_20 < log(200000)) / length(samps_20)
 p_1m <- sum(samps_20 < log(1000000)) / length(samps_20)
@@ -526,11 +526,11 @@ p_5m <- sum(samps_20 < log(5000000)) / length(samps_20)
 p_200k; p_1m; p_3m; p_5m
 sum(samps_20 < log(12800000)) / length(samps_20)
 
-# mu 51 histogram (updated to 50th mu)
+# mu 52 histogram (updated to 52th mu)
 hist_20 <- ggplot() +
   geom_density(data=data.frame(x=samps_20), aes(x=x), 
                alpha=0.6, fill="#984ea3", col="#984ea3", linewidth=NA) +
-  labs(x="Estimated log(monarch abundance) in 2041", y="Density") +
+  labs(x="Estimated log(monarch abundance) in 2044", y="Density") +
   scale_x_continuous(limits=c(12, 23), breaks=seq(5, 30, 1)) +
   geom_vline(xintercept=log(200000), lty=5, col="gray15") +
   geom_vline(xintercept=log(1000000), lty=5, col="gray35") +
@@ -544,7 +544,7 @@ ggsave("figure_4.tiff", width = 8.66, height = 4.33, dpi = 600, units = "in")
 ssm_mus2 <- as.data.frame(t(apply(t(ssm_out2$BUGSoutput$sims.list$mu), 1, quantile, 
                                   probs=c(0.025, 0.05, 0.25, 0.5, 0.75, 0.95, 0.975)))) %>% 
   rename_with(~ paste0("ssm", gsub("%", "", .)))
-md2 <- md1 %>% select(1,4) %>% add_row(year=2024:2043, log_idx=NA) %>%  
+md2 <- md1 %>% select(1,4) %>% add_row(year=2025:2044, log_idx=NA) %>%  
   bind_cols(ssm_mus2) 
 
 # make ts plot
@@ -555,14 +555,14 @@ ts_ssm2 <- ggplot(md2, aes(x=year))  +
   geom_line(aes(y=ssm50), linewidth=0.8, col="#984ea3") + geom_point(aes(y=log_idx), pch=1) +
   labs(x="Year", y="SSM log(abundance)") +
   scale_y_continuous(limits=c(11, 20.5)) +
-  scale_x_continuous(breaks=seq(1995, 2040, 5)) +
+  scale_x_continuous(breaks=seq(1994, 2044, 5)) +
   geom_hline(yintercept=log(200000), lty=2, col="gray15") +
   geom_hline(yintercept=log(1000000), lty=2, col="gray35") +
   geom_hline(yintercept=log(3000000), lty=2, col="gray55") +
   geom_hline(yintercept=log(5000000), lty=2, col="gray65") +
   geom_hline(yintercept=log(5000000), lty=2, col="gray75") +
-  geom_vline(xintercept=2023, lty=2, col="gray60") +
-  geom_vline(xintercept=2043, lty=2, col="gray60")
+  geom_vline(xintercept=2024, lty=2, col="gray60") +
+  geom_vline(xintercept=2044, lty=2, col="gray60")
 ts_ssm2
 ggsave("figure_5.tiff", width = 8.66, height = 4.33, dpi = 600, units = "in")
 # ------------------------------------------------------------------------------
@@ -587,7 +587,7 @@ model {
     rate[i] ~ dnorm(b0 + b1 * (mu[i - 1]), tau.proc)
   }
 ### derived
-  tyc <- ((exp(mu[30]) - exp(mu[20])) / exp(mu[20])) * 100
+  tyc <- ((exp(mu[32]) - exp(mu[22])) / exp(mu[22])) * 100
   for(i in 4:n){
     loglik[i] <- logdensity.norm(y[i], mu[i], tau.obs)
   }
